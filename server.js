@@ -75,9 +75,11 @@ app.get('/api/weather', async (req, res) => {
 });
 
 // ============ GROQ AI CHATBOT (PLANTO) ============
+// ============ GROQ AI CHATBOT (PLANTO) ============
 app.post('/api/planto', async (req, res) => {
     const userMessage = req.body.message;
     console.log('🔍 Planto received:', userMessage);
+    console.log('🔑 Groq key starts with:', process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.substring(0, 10) + '...' : 'MISSING');
     
     const systemPrompt = `You are Planto, a friendly plant expert assistant created by Team ALPHA (Class 8A, Little Angels School, Visakhapatnam) for their Kaushal Bodh hydroponics project. 
     
@@ -94,6 +96,8 @@ app.post('/api/planto', async (req, res) => {
     Keep responses under 150 words unless specifically asked for more detail.`;
 
     try {
+        console.log('📡 Sending to Groq...');
+        
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -101,7 +105,7 @@ app.post('/api/planto', async (req, res) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'qwen/qwen-3.8-27b',
+                model: 'openai/gpt-oss-20b',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userMessage }
@@ -111,16 +115,27 @@ app.post('/api/planto', async (req, res) => {
             })
         });
         
+        console.log('📥 Status:', response.status);
+        
         const data = await response.json();
+        console.log('📦 Response:', JSON.stringify(data).substring(0, 200));
         
         if (data.error) {
+            console.error('❌ Groq error:', JSON.stringify(data.error));
             return res.status(500).json({ error: data.error.message || 'Groq API error' });
         }
         
+        if (!data.choices || !data.choices[0]) {
+            console.error('❌ No choices in response');
+            return res.status(500).json({ error: 'No response from Groq' });
+        }
+        
+        console.log('✅ Success!');
         res.json({ reply: data.choices[0].message.content });
         
     } catch (error) {
-        console.error('❌ Full error:', error);
+        console.error('❌ Exception:', error.message);
+        console.error('❌ Stack:', error.stack);
         res.status(500).json({ error: error.message || 'Planto failed' });
     }
 });
