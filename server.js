@@ -101,7 +101,7 @@ app.post('/api/planto', async (req, res) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'openai/gpt-oss-20b',
+                model: 'qwen/qwen-3.8-27b',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userMessage }
