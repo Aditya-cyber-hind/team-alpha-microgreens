@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team ALPHA - Microgreens Project</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">🌱 Team ALPHA</h1>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#timeline">Timeline</a></li>
+                <li><a href="#stats">Stats</a></li>
+                <li><a href="#science">Science</a></li>
+                <li><a href="#weather">Weather</a></li>
+                <li><a href="#team">Team</a></li>
+                <li><a href="#plants-api">Plant DB</a></li>
+                <li><a href="#quiz">Quiz</a></li>
+                <li><a href="#testimonials">Testimonials</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h2 class="hero-title">The Microgreen Mission</h2>
+            <p class="hero-subtitle">Project by Class 8A, Little Angels School, Visakhapatnam</p>
+            <p class="hero-text">Growing nutritious food using hydroponics - no soil needed! 🌿</p>
+            <div class="hero-badges">
+                <span class="badge">Kaushal Bodh Initiative</span>
+                <span class="badge">Hydroponics</span>
+                <span class="badge">Microgreens</span>
+            </div>
+        </div>
+        <div class="hero-image" onclick="openLightbox(this)">
+            <img src="/images/day5.jpeg" alt="Our Microgreens" id="heroImg">
+        </div>
+    </section>
+
+    <!-- Growth Stats Section -->
+    <section id="stats" class="section stats-section">
+        <h2 class="section-title">📊 Our Growth Stats</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 class="stat-number" data-target="5">0</h3>
+                <p>Days of Growth</p>
+            </div>
+            <div class="stat-card">
+                <h3 class="stat-number" data-target="9">0</h3>
+                <p>Team Members</p>
+            </div>
+            <div class="stat-card">
+                <h3 class="stat-number" data-target="90">0</h3>
+                <p>% Water Saved</p>
+            </div>
+            <div class="stat-card">
+                <h3 class="stat-number" data-target="40">0</h3>
+                <p>X More Nutrients</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section id="timeline" class="section">
+        <h2 class="section-title">📸 Growth Timeline</h2>
+        <p class="section-subtitle">Our journey from Monday to Friday</p>
+        
+        <div class="timeline-days">
+            <button class="day-btn active" data-day="1">Monday</button>
+            <button class="day-btn" data-day="2">Tuesday</button>
+            <button class="day-btn" data-day="3">Wednesday</button>
+            <button class="day-btn" data-day="4">Thursday</button>
+            <button class="day-btn" data-day="5">Friday</button>
+        </div>
+
+        <div class="timeline-display">
+            <div class="timeline-image" onclick="openLightbox(this)">
+                <img src="/images/day1.jpeg" alt="Day 1" id="timelineImg">
+            </div>
+            <div class="timeline-caption" id="timelineCaption">
+                <h3>Day 1 - Monday</h3>
+                <p id="captionText">We started our microgreens journey! Soaked the seeds overnight to wake them up.</p>
+            </div>
+        </div>
+        
+        <!-- Growth Chart -->
+        <div class="growth-chart">
+            <h3>📈 Growth Progress</h3>
+            <div class="chart-bars">
+                <div class="chart-bar" style="height: 20%"><span>Day 1</span></div>
+                <div class="chart-bar" style="height: 40%"><span>Day 2</span></div>
+                <div class="chart-bar" style="height: 60%"><span>Day 3</span></div>
+                <div class="chart-bar" style="height: 80%"><span>Day 4</span></div>
+                <div class="chart-bar" style="height: 100%"><span>Day 5</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Science Section -->
+    <section id="science" class="section science-bg">
+        <h2 class="section-title">🔬 The Science Behind It</h2>
+        <div class="science-grid">
+            <div class="science-card">
+                <h3>💧 What is Hydroponics?</h3>
+                <p>Growing plants without soil! Plants get nutrients directly from water mixed with minerals. It saves 90% more water than traditional farming!</p>
+            </div>
+            <div class="science-card">
+                <h3>🌱 What are Microgreens?</h3>
+                <p>Baby plants harvested after 7-14 days! They contain up to 40x more nutrients than mature vegetables. Perfect for quick, healthy food!</p>
+            </div>
+            <div class="science-card">
+                <h3>⚡ Why It's Awesome</h3>
+                <p>No soil = no mess! Plants grow 30-50% faster in hydroponics. Perfect for urban areas and even space missions! 🚀</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Weather Section -->
+    <section id="weather" class="section weather-section">
+        <h2 class="section-title">🌤️ Visakhapatnam Weather</h2>
+        <p class="section-subtitle">Live weather affecting our plants</p>
+        <div class="weather-card" id="weatherCard">
+            <p>Loading weather data...</p>
+        </div>
+    </section>
+
+    <!-- Plant Database Section -->
+    <section id="plants-api" class="section">
+        <h2 class="section-title">🌿 Plant Database</h2>
+        <p class="section-subtitle">Powered by Perenual API - Learn about any plant!</p>
+        
+        <div class="plant-search">
+            <input type="text" id="plantSearch" placeholder="Search for any plant (e.g., basil, lettuce, tomato)">
+            <button onclick="searchPlants()">🔍 Search</button>
+        </div>
+        
+        <div id="plantResults" class="plant-results">
+            <!-- Plant cards will appear here -->
+        </div>
+        
+        <div class="random-facts">
+            <h3>💡 Random Plant Fact</h3>
+            <p id="randomFact">Loading amazing plant facts...</p>
+            <button onclick="getRandomFact()" class="fact-btn">🔄 New Fact</button>
+        </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section id="quiz" class="section quiz-section">
+        <h2 class="section-title">🎯 Test Your Plant Knowledge!</h2>
+        <p class="section-subtitle">How much do you know about hydroponics?</p>
+        <div class="quiz-container" id="quizContainer">
+            <h3 id="quizQuestion">Click start to begin the quiz!</h3>
+            <div class="quiz-options" id="quizOptions"></div>
+            <button onclick="startQuiz()" class="quiz-btn" id="quizBtn">Start Quiz!</button>
+            <p id="quizResult"></p>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="section">
+        <h2 class="section-title">👥 Team ALPHA</h2>
+        <p class="section-subtitle">Roll No 1-9 | Class 8A | Little Angels School</p>
+        
+        <div class="team-grid" id="teamGrid">
+            <!-- JavaScript will fill this -->
+        </div>
+        
+        <!-- Achievement Badges -->
+        <div class="achievements">
+            <h3>🏆 Team Achievements</h3>
+            <div class="badges-grid">
+                <div class="achievement-badge">🌱<br>Day 1 Survivor</div>
+                <div class="achievement-badge">🌿<br>Root Master</div>
+                <div class="achievement-badge">💪<br>Green Thumb</div>
+                <div class="achievement-badge">🏆<br>ALPHA Legend</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="section testimonials-section">
+        <h2 class="section-title">💬 What Our Team Says</h2>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <p>"Growing microgreens was so cool! I never knew plants could grow without soil!"</p>
+                <h4>- Aditya Choudhary</h4>
+            </div>
+            <div class="testimonial-card">
+                <p>"The hydroponic system was easy to set up. Our microgreens grew so fast!"</p>
+                <h4>- G.Bokam</h4>
+            </div>
+            <div class="testimonial-card">
+                <p>"I can't wait to try growing more plants using hydroponics at home!"</p>
+                <h4>- G. John Stephen</h4>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>🌱 Team ALPHA - Kaushal Bodh Project</p>
+        <p>Little Angels School, Visakhapatnam | 2026</p>
+    </footer>
+
+    <!-- Planto Chatbot -->
+    <button class="chatbot-toggle" onclick="toggleChat()">
+        🌱 Chat with Planto
+    </button>
+    
+    <div class="chatbot-window" id="chatWindow">
+        <div class="chatbot-header">
+            <h3>🌱 Planto - Your Plant Guide</h3>
+            <button onclick="toggleChat()" class="close-btn">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                Hi! I'm Planto! 👋 I'm Team ALPHA's AI assistant. Ask me anything about plants, hydroponics, or microgreens!
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Ask me anything about plants..." onkeypress="handleEnter(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <img src="" alt="Lightbox Image" id="lightboxImg">
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
