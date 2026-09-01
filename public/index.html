@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team ALPHA - Microgreens Project</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -21,6 +22,7 @@
                 <li><a href="#stats">Stats</a></li>
                 <li><a href="#science">Science</a></li>
                 <li><a href="#weather">Weather</a></li>
+                <li><a href="#disease-detector">Disease AI</a></li>
                 <li><a href="#team">Team</a></li>
                 <li><a href="#plants-api">Plant DB</a></li>
                 <li><a href="#quiz">Quiz</a></li>
@@ -134,6 +136,31 @@
         </div>
     </section>
 
+    <!-- Plant Disease Detector Section -->
+    <section id="disease-detector" class="section">
+        <h2 class="section-title">🔬 AI Plant Disease Detector</h2>
+        <p class="section-subtitle">Upload a photo of any plant - AI will diagnose it!</p>
+        
+        <div class="disease-detector-container">
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="plantImage" accept="image/*" onchange="previewImage(this)">
+                <div class="upload-placeholder">
+                    <p>📸 Click to upload plant photo</p>
+                    <p style="font-size:0.8rem;color:#666;">JPG, PNG or JPEG</p>
+                </div>
+                <img id="imagePreview" class="image-preview" style="display:none;">
+            </div>
+            
+            <button onclick="detectDisease()" class="detect-btn" id="detectBtn" style="display:none;">
+                🔍 Analyze Plant
+            </button>
+            
+            <div id="diagnosisResult" class="diagnosis-result" style="display:none;">
+                <!-- Diagnosis will appear here -->
+            </div>
+        </div>
+    </section>
+
     <!-- Plant Database Section -->
     <section id="plants-api" class="section">
         <h2 class="section-title">🌿 Plant Database</h2>
@@ -198,11 +225,11 @@
             </div>
             <div class="testimonial-card">
                 <p>"The hydroponic system was easy to set up. Our microgreens grew so fast!"</p>
-                <h4>- G.Bokam</h4>
+                <h4>- Team ALPHA Member</h4>
             </div>
             <div class="testimonial-card">
                 <p>"I can't wait to try growing more plants using hydroponics at home!"</p>
-                <h4>- G. John Stephen</h4>
+                <h4>- Team ALPHA Member</h4>
             </div>
         </div>
     </section>
@@ -225,12 +252,13 @@
         </div>
         <div class="chat-messages" id="chatMessages">
             <div class="message bot-message">
-                Hi! I'm Planto! 👋 I'm Team ALPHA's AI assistant. Ask me anything about plants, hydroponics, or microgreens!
+                Hi! I'm Planto! 👋 I'm Team ALPHA's AI assistant. Ask me anything about plants, hydroponics, or microgreens! You can also type or use the 🎤 button to speak to me!
             </div>
         </div>
         <div class="chat-input">
             <input type="text" id="userInput" placeholder="Ask me anything about plants..." onkeypress="handleEnter(event)">
             <button onclick="sendMessage()">Send</button>
+            <button onclick="startVoiceInput()" id="voiceBtn" title="Speak to Planto">🎤</button>
         </div>
     </div>
 

@@ -12,7 +12,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static('public'));
 
 // ============ TEST ROUTE ============
@@ -63,7 +64,6 @@ app.get('/api/plant/search', async (req, res) => {
 // ============ WEATHER API (Visakhapatnam) ============
 app.get('/api/weather', async (req, res) => {
     try {
-        // Using Open-Meteo free API (no key needed!)
         const url = 'https://api.open-meteo.com/v1/forecast?latitude=17.6868&longitude=83.2185&current=temperature_2m,relative_humidity_2m,weather_code&timezone=Asia/Kolkata';
         const response = await fetch(url);
         const data = await response.json();
@@ -74,7 +74,6 @@ app.get('/api/weather', async (req, res) => {
     }
 });
 
-// ============ GROQ AI CHATBOT (PLANTO) ============
 // ============ GROQ AI CHATBOT (PLANTO) ============
 app.post('/api/planto', async (req, res) => {
     const userMessage = req.body.message;
@@ -118,7 +117,6 @@ app.post('/api/planto', async (req, res) => {
         console.log('📥 Status:', response.status);
         
         const data = await response.json();
-        console.log('📦 Response:', JSON.stringify(data).substring(0, 200));
         
         if (data.error) {
             console.error('❌ Groq error:', JSON.stringify(data.error));
@@ -135,8 +133,103 @@ app.post('/api/planto', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Exception:', error.message);
-        console.error('❌ Stack:', error.stack);
         res.status(500).json({ error: error.message || 'Planto failed' });
+    }
+});
+
+// ============ PLANT DISEASE DETECTOR ============
+app.post('/api/detect-disease', async (req, res) => {
+    const imageBase64 = req.body.image;
+    console.log('🔬 Disease detection requested');
+    
+    if (!imageBase64) {
+        return res.status(400).json({ error: 'No image provided' });
+    }
+    
+    const systemPrompt = `You are a plant disease expert. Analyze the provided image and identify if the plant is healthy or diseased. 
+    
+    Respond in JSON format with these fields:
+    {
+        "isHealthy": true/false,
+        "diagnosis": "What you see in the image",
+        "treatment": "Recommended treatment or care tips"
+    }
+    
+    Keep diagnosis under 100 words and treatment under 100 words.`;
+    
+    try {
+        console.log('📡 Sending image to Groq Vision...');
+        
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'qwen/qwen3.6-27b',
+                messages: [
+                    {
+                        role: 'system',
+                        content: systemPrompt
+                    },
+                    {
+                        role: 'user',
+                        content: [
+                            {
+                                type: 'text',
+                                text: 'Analyze this plant image for diseases.'
+                            },
+                            {
+                                type: 'image_url',
+                                image_url: {
+                                    url: imageBase64
+                                }
+                            }
+                        ]
+                    }
+                ],
+                temperature: 0.3,
+                max_tokens: 500
+            })
+        });
+        
+        console.log('📥 Status:', response.status);
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            console.error('❌ Groq vision error:', data.error);
+            return res.status(500).json({ error: data.error.message || 'Vision API failed' });
+        }
+        
+        let result;
+        try {
+            const content = data.choices[0].message.content;
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                result = JSON.parse(jsonMatch[0]);
+            } else {
+                result = {
+                    isHealthy: true,
+                    diagnosis: content,
+                    treatment: 'No specific treatment needed. Keep monitoring your plant.'
+                };
+            }
+        } catch (parseError) {
+            result = {
+                isHealthy: true,
+                diagnosis: data.choices[0].message.content,
+                treatment: 'Continue normal care. If issues persist, consult a local gardener.'
+            };
+        }
+        
+        console.log('✅ Diagnosis complete!');
+        res.json(result);
+        
+    } catch (error) {
+        console.error('❌ Disease detection error:', error.message);
+        res.status(500).json({ error: 'Failed to analyze image' });
     }
 });
 

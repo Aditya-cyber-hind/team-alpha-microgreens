@@ -14,7 +14,6 @@ function toggleDarkMode() {
     }
 }
 
-// Check for saved dark mode preference
 if (localStorage.getItem('darkMode') === 'enabled') {
     document.body.classList.add('dark-mode');
     document.querySelector('.dark-mode-toggle').textContent = '☀️';
@@ -81,7 +80,7 @@ function animateCounters() {
     counters.forEach(counter => {
         const target = parseInt(counter.getAttribute('data-target'));
         let current = 0;
-        const increment = target / 50; // Animate over 50 steps
+        const increment = target / 50;
         
         const updateCounter = () => {
             current += increment;
@@ -97,7 +96,6 @@ function animateCounters() {
     });
 }
 
-// Trigger counter animation when stats section is visible
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -345,7 +343,6 @@ function closeLightbox() {
     document.getElementById('lightbox').classList.remove('active');
 }
 
-// Close lightbox with Escape key
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeLightbox();
@@ -396,6 +393,9 @@ async function sendMessage() {
         botMessageDiv.textContent = data.reply;
         chatMessages.appendChild(botMessageDiv);
         
+        // Speak Planto's reply
+        speakText(data.reply);
+        
         chatMessages.scrollTop = chatMessages.scrollHeight;
     } catch (error) {
         chatMessages.removeChild(typingDiv);
@@ -410,5 +410,188 @@ async function sendMessage() {
 function handleEnter(event) {
     if (event.key === 'Enter') {
         sendMessage();
+    }
+}
+
+// ============ VOICE-CONTROLLED PLANTO ============
+let isListening = false;
+let recognition = null;
+
+function startVoiceInput() {
+    const voiceBtn = document.getElementById('voiceBtn');
+    const userInput = document.getElementById('userInput');
+    
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('Voice input not supported in this browser. Please use Chrome!');
+        return;
+    }
+    
+    if (isListening) {
+        recognition.stop();
+        isListening = false;
+        voiceBtn.classList.remove('listening');
+        voiceBtn.textContent = '🎤';
+        return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    
+    recognition.onstart = function() {
+        isListening = true;
+        voiceBtn.classList.add('listening');
+        voiceBtn.textContent = '🔴';
+        userInput.placeholder = 'Listening... Speak now!';
+    };
+    
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        userInput.value = transcript;
+        userInput.placeholder = 'Ask me anything about plants...';
+        sendMessage();
+    };
+    
+    recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+        isListening = false;
+        voiceBtn.classList.remove('listening');
+        voiceBtn.textContent = '🎤';
+        userInput.placeholder = 'Ask me anything about plants...';
+    };
+    
+    recognition.onend = function() {
+        isListening = false;
+        voiceBtn.classList.remove('listening');
+        voiceBtn.textContent = '🎤';
+        userInput.placeholder = 'Ask me anything about plants...';
+    };
+    
+    recognition.start();
+}
+
+// ============ TEXT-TO-SPEECH FOR PLANTO ============
+function speakText(text) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        
+        const voices = window.speechSynthesis.getVoices();
+        const femaleVoice = voices.find(voice => 
+            voice.name.includes('Female') || 
+            voice.name.includes('Samantha') || 
+            voice.name.includes('Google UK English Female')
+        );
+        
+        if (femaleVoice) {
+            utterance.voice = femaleVoice;
+        }
+        
+        window.speechSynthesis.speak(utterance);
+    }
+}
+
+// ============ PLANT DISEASE DETECTOR ============
+let uploadedImageBase64 = '';
+
+function previewImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const maxWidth = 800;
+            const maxHeight = 800;
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > height) {
+                if (width > maxWidth) {
+                    height = height * (maxWidth / width);
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width = width * (maxHeight / height);
+                    height = maxHeight;
+                }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            uploadedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+            
+            const preview = document.getElementById('imagePreview');
+            preview.src = uploadedImageBase64;
+            preview.style.display = 'block';
+            
+            document.querySelector('.upload-placeholder').style.display = 'none';
+            document.getElementById('detectBtn').style.display = 'block';
+            document.getElementById('diagnosisResult').style.display = 'none';
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+async function detectDisease() {
+    const resultDiv = document.getElementById('diagnosisResult');
+    const detectBtn = document.getElementById('detectBtn');
+    
+    if (!uploadedImageBase64) {
+        alert('Please upload an image first!');
+        return;
+    }
+    
+    detectBtn.textContent = '🔬 Analyzing...';
+    detectBtn.disabled = true;
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<p>🤖 AI is analyzing your plant...</p>';
+    
+    try {
+        const response = await fetch('/api/detect-disease', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ image: uploadedImageBase64 })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            resultDiv.innerHTML = `<p style="color:red;">❌ ${data.error}</p>`;
+            return;
+        }
+        
+        resultDiv.innerHTML = `
+            <h3>🔬 Diagnosis Result</h3>
+            <p class="${data.isHealthy ? 'healthy' : 'diseased'}">
+                ${data.isHealthy ? '✅ Plant looks healthy!' : '⚠️ Plant may have issues!'}
+            </p>
+            <h4>📋 Details:</h4>
+            <p>${data.diagnosis}</p>
+            <h4>💊 Treatment:</h4>
+            <p>${data.treatment}</p>
+        `;
+        
+    } catch (error) {
+        resultDiv.innerHTML = '<p style="color:red;">❌ Error analyzing plant. Please try again.</p>';
+    } finally {
+        detectBtn.textContent = '🔍 Analyze Plant';
+        detectBtn.disabled = false;
     }
 }
