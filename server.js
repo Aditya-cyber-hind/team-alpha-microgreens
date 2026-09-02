@@ -143,7 +143,7 @@ app.post('/api/planto', async (req, res) => {
     }
 });
 
-// ============ PLANT DISEASE DETECTOR (TWO-STEP WITH DETAILED OUTPUT) ============
+// ============ PLANT DISEASE DETECTOR (SMART HEALTH DETECTION) ============
 app.post('/api/detect-disease', async (req, res) => {
     const imageBase64 = req.body.image;
     console.log('🔬 Disease detection requested');
@@ -153,10 +153,9 @@ app.post('/api/detect-disease', async (req, res) => {
     }
     
     try {
-        console.log('📡 Step 1: Analyzing image with Vision AI...');
+        console.log('📡 Sending image to Groq Vision...');
         
-        // Step 1: Use vision model to analyze the image
-        const visionResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
@@ -170,7 +169,7 @@ app.post('/api/detect-disease', async (req, res) => {
                         content: [
                             {
                                 type: 'text',
-                                text: 'Describe this plant image in detail. Include: appearance, color, texture, any spots/mold/discoloration/wilting/pests, overall health assessment. Answer in 3-4 detailed sentences. Do NOT show thinking.'
+                                text: 'Analyze this plant image in extreme detail. Identify the plant type, assess health, list all symptoms, determine if healthy or diseased, and provide treatment recommendations. Be VERY thorough and detailed.'
                             },
                             {
                                 type: 'image_url',
@@ -181,129 +180,89 @@ app.post('/api/detect-disease', async (req, res) => {
                         ]
                     }
                 ],
-                temperature: 0.3,
-                max_tokens: 300
+                temperature: 0.5,
+                max_tokens: 800
             })
         });
         
-        const visionData = await visionResponse.json();
+        console.log('📥 Status:', response.status);
         
-        if (visionData.error) {
-            console.error('❌ Vision error:', visionData.error);
-            return res.status(500).json({ error: visionData.error.message || 'Vision API failed' });
+        const data = await response.json();
+        
+        if (data.error) {
+            console.error('❌ Groq vision error:', data.error);
+            return res.status(500).json({ error: data.error.message || 'Vision API failed' });
         }
         
-        let analysis = visionData.choices[0].message.content;
-        console.log('📝 Raw vision analysis:', analysis.substring(0, 200));
+        const fullAnalysis = data.choices[0].message.content;
+        console.log('📦 Full analysis received!');
         
-        // CLEAN THE ANALYSIS - Remove thinking blocks and markdown
-        analysis = analysis
-            .replace(/<think>[\s\S]*?<\/think>/g, '')
-            .replace(/\*\*/g, '')
-            .replace(/-\s*\*.*?\*/g, '')
-            .replace(/\d+\.\s*\*.*?\*/g, '')
-            .replace(/The user wants.*?\./g, '')
-            .replace(/Drafting the response:[\s\S]*$/g, '')
-            .replace(/Based on.*?\./g, '')
-            .replace(/Let me.*?\./g, '')
-            .replace(/I (see|observe|notice).*?\./g, '')
-            .trim();
+        // SMARTER health detection - look for CONTEXT not just keywords
+        const negativePatterns = [
+            /severe\s+(browning|yellowing|wilting|damage)/i,
+            /signs?\s+of\s+(disease|infection|rot|mold|fungus|pest)/i,
+            /(severely|heavily)\s+(diseased|infected|damaged|stressed)/i,
+            /(root\s+rot|leaf\s+spot|powdery\s+mildew|bacterial\s+wilt)/i,
+            /(dying|dead|unhealthy|sick)\s+plant/i,
+            /(widespread|extensive)\s+(browning|damage|necrosis)/i,
+            /(pest|insect)\s+(infestation|damage)/i,
+            /(mold|fungus)\s+(growing|present|visible)/i,
+            /(brown|black)\s+(spots|patches|lesions)/i,
+            /(wilting|drooping)\s+(leaves|stems|flowers)/i
+        ];
         
-        // If analysis is empty after cleaning, use fallback
-        if (analysis.length < 20) {
-            analysis = 'The plant appears to be sprouts or microgreens with green leaves and white stems. No obvious signs of disease visible.';
-        }
+        const positivePatterns = [
+            /(healthy|vigorous|thriving|vibrant)/i,
+            /no\s+(visible\s+)?(signs?\s+of\s+)?(disease|pest|mold|fungus|damage)/i,
+            /(looks?|appears?)\s+(healthy|good|great|fine)/i,
+            /(normal|natural)\s+(aging|senescence|die-?back)/i
+        ];
         
-        console.log('📝 Cleaned analysis:', analysis.substring(0, 200));
+        let negativeScore = 0;
+        let positiveScore = 0;
         
-        // Step 2: Use text model for DETAILED, DYNAMIC JSON output
-        console.log('📡 Step 2: Generating detailed response...');
-        
-        const textResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'openai/gpt-oss-20b',
-                messages: [
-                    {
-                        role: 'system',
-                        content: `You are a plant disease expert AI. Based on the plant analysis provided, create a DETAILED diagnosis.
-                        
-                        Output ONLY valid JSON in this format:
-                        {
-                            "isHealthy": true/false,
-                            "diagnosis": "Detailed 30-50 word diagnosis explaining what you see and why",
-                            "treatment": "Detailed 30-50 word treatment plan with specific care instructions",
-                            "funFact": "An interesting fact about this type of plant",
-                            "confidence": "High/Medium/Low confidence in this diagnosis"
-                        }
-                        
-                        Rules:
-                        - Make diagnosis DETAILED and specific
-                        - Make treatment PRACTICAL and actionable
-                        - Include a fun fact about the plant type
-                        - Be conversational but professional
-                        - Output ONLY the JSON, no markdown, no code blocks`
-                    },
-                    {
-                        role: 'user',
-                        content: `Plant analysis: "${analysis}"
-                        
-                        Create a detailed JSON diagnosis.`
-                    }
-                ],
-                temperature: 0.8,
-                max_tokens: 400
-            })
+        negativePatterns.forEach(pattern => {
+            if (pattern.test(fullAnalysis)) negativeScore++;
         });
         
-        const textData = await textResponse.json();
+        positivePatterns.forEach(pattern => {
+            if (pattern.test(fullAnalysis)) positiveScore++;
+        });
         
-        if (textData.error) {
-            console.error('❌ Text model error:', textData.error);
-            return res.status(500).json({ error: textData.error.message || 'Text API failed' });
-        }
+        // Check if AI explicitly says "healthy" or "diseased"
+        const saysHealthy = /(?:is|looks|appears|verdict|conclusion)[:\s]*(healthy|fine|good|vigorous)/i.test(fullAnalysis);
+        const saysDiseased = /(?:is|looks|appears|verdict|conclusion)[:\s]*(diseased|unhealthy|sick|dying)/i.test(fullAnalysis);
         
-        let content = textData.choices[0].message.content;
-        console.log('📦 Raw text response:', content);
-        
-        // Clean the text response
-        content = content
-            .replace(/```json/g, '')
-            .replace(/```/g, '')
-            .trim();
-        
-        // Parse the JSON
-        let result;
-        try {
-            result = JSON.parse(content);
-        } catch (directParseError) {
-            try {
-                const jsonMatch = content.match(/\{[\s\S]*\}/);
-                if (jsonMatch) {
-                    result = JSON.parse(jsonMatch[0]);
-                } else {
-                    throw new Error('No JSON found');
-                }
-            } catch (extractError) {
-                console.error('❌ Parse failed, using fallback');
-                const looksHealthy = !/disease|mold|rot|spots|wilting|yellowing|pest|fungus|brown|black/i.test(analysis);
-                result = {
-                    isHealthy: looksHealthy,
-                    diagnosis: looksHealthy 
-                        ? 'The plant appears healthy with vibrant green leaves and strong stems. No signs of disease, mold, or pest damage visible.' 
-                        : 'The plant shows potential signs of stress. Further inspection recommended for spots, discoloration, or unusual growth patterns.',
-                    treatment: looksHealthy 
-                        ? 'Maintain current care routine. Ensure proper light, water regularly, and monitor for any changes over the next few days.' 
-                        : 'Isolate from other plants. Remove affected areas if possible and apply appropriate organic treatment.',
-                    funFact: 'Microgreens can contain up to 40x more nutrients than mature plants!',
-                    confidence: 'Medium'
-                };
+        let looksHealthy;
+        if (saysDiseased && !saysHealthy) {
+            looksHealthy = false;
+        } else if (saysHealthy && !saysDiseased) {
+            looksHealthy = true;
+        } else if (positiveScore > negativeScore) {
+            looksHealthy = true;
+        } else if (negativeScore > positiveScore) {
+            looksHealthy = false;
+        } else {
+            // Check the conclusion section
+            const conclusionMatch = fullAnalysis.match(/(?:Conclusion|Verdict|Diagnosis)[:\s]*([^\n*]+)/i);
+            if (conclusionMatch) {
+                looksHealthy = !/diseased|unhealthy|sick|dying|rot/i.test(conclusionMatch[1]);
+            } else {
+                looksHealthy = true;
             }
         }
+        
+        console.log('📊 Scores - Negative:', negativeScore, 'Positive:', positiveScore);
+        console.log('📋 Verdict:', looksHealthy ? 'HEALTHY ✅' : 'DISEASED ⚠️');
+        
+        // Use the FULL analysis as the diagnosis
+        const result = {
+            isHealthy: looksHealthy,
+            diagnosis: fullAnalysis,
+            treatment: looksHealthy 
+                ? 'Based on the analysis, maintain regular care and monitor for any changes.'
+                : 'Based on the analysis, immediate intervention is recommended. Isolate the plant, remove affected parts, and apply appropriate treatment.'
+        };
         
         console.log('✅ Diagnosis complete!');
         res.json(result);
