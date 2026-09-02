@@ -577,15 +577,18 @@ async function detectDisease() {
             return;
         }
         
+        // Display detailed result
         resultDiv.innerHTML = `
             <h3>🔬 Diagnosis Result</h3>
             <p class="${data.isHealthy ? 'healthy' : 'diseased'}">
                 ${data.isHealthy ? '✅ Plant looks healthy!' : '⚠️ Plant may have issues!'}
             </p>
-            <h4>📋 Details:</h4>
-            <p>${data.diagnosis}</p>
+            <h4>📋 Diagnosis:</h4>
+            <p>${data.diagnosis || 'Analysis complete.'}</p>
             <h4>💊 Treatment:</h4>
-            <p>${data.treatment}</p>
+            <p>${data.treatment || 'Continue regular care.'}</p>
+            ${data.funFact ? `<h4>💡 Fun Fact:</h4><p>${data.funFact}</p>` : ''}
+            ${data.confidence ? `<h4>📊 Confidence:</h4><p>${data.confidence}</p>` : ''}
         `;
         
     } catch (error) {
