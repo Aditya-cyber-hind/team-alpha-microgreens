@@ -142,8 +142,7 @@ app.post('/api/planto', async (req, res) => {
         res.status(500).json({ error: error.message || 'Planto failed' });
     }
 });
-
-// ============ PLANT DISEASE DETECTOR (SMART HEALTH DETECTION) ============
+// ============ PLANT DISEASE DETECTOR (SIMPLE) ============
 app.post('/api/detect-disease', async (req, res) => {
     const imageBase64 = req.body.image;
     console.log('🔬 Disease detection requested');
@@ -169,7 +168,7 @@ app.post('/api/detect-disease', async (req, res) => {
                         content: [
                             {
                                 type: 'text',
-                                text: 'Analyze this plant image in extreme detail. Identify the plant type, assess health, list all symptoms, determine if healthy or diseased, and provide treatment recommendations. Be VERY thorough and detailed.'
+                                text: 'Analyze this plant image. At the very END of your response, write EXACTLY one of these two words: HEALTHY or DISEASED'
                             },
                             {
                                 type: 'image_url',
@@ -180,7 +179,7 @@ app.post('/api/detect-disease', async (req, res) => {
                         ]
                     }
                 ],
-                temperature: 0.5,
+                temperature: 0.3,
                 max_tokens: 800
             })
         });
@@ -197,74 +196,21 @@ app.post('/api/detect-disease', async (req, res) => {
         const fullAnalysis = data.choices[0].message.content;
         console.log('📦 Full analysis received!');
         
-        // SMARTER health detection - look for CONTEXT not just keywords
-        const negativePatterns = [
-            /severe\s+(browning|yellowing|wilting|damage)/i,
-            /signs?\s+of\s+(disease|infection|rot|mold|fungus|pest)/i,
-            /(severely|heavily)\s+(diseased|infected|damaged|stressed)/i,
-            /(root\s+rot|leaf\s+spot|powdery\s+mildew|bacterial\s+wilt)/i,
-            /(dying|dead|unhealthy|sick)\s+plant/i,
-            /(widespread|extensive)\s+(browning|damage|necrosis)/i,
-            /(pest|insect)\s+(infestation|damage)/i,
-            /(mold|fungus)\s+(growing|present|visible)/i,
-            /(brown|black)\s+(spots|patches|lesions)/i,
-            /(wilting|drooping)\s+(leaves|stems|flowers)/i
-        ];
+        // Check the LAST word of the analysis
+        const lastWord = fullAnalysis.trim().split(/\s+/).pop().toUpperCase();
+        console.log('📋 Last word:', lastWord);
         
-        const positivePatterns = [
-            /(healthy|vigorous|thriving|vibrant)/i,
-            /no\s+(visible\s+)?(signs?\s+of\s+)?(disease|pest|mold|fungus|damage)/i,
-            /(looks?|appears?)\s+(healthy|good|great|fine)/i,
-            /(normal|natural)\s+(aging|senescence|die-?back)/i
-        ];
+        const isHealthy = lastWord === 'HEALTHY';
         
-        let negativeScore = 0;
-        let positiveScore = 0;
-        
-        negativePatterns.forEach(pattern => {
-            if (pattern.test(fullAnalysis)) negativeScore++;
-        });
-        
-        positivePatterns.forEach(pattern => {
-            if (pattern.test(fullAnalysis)) positiveScore++;
-        });
-        
-        // Check if AI explicitly says "healthy" or "diseased"
-        const saysHealthy = /(?:is|looks|appears|verdict|conclusion)[:\s]*(healthy|fine|good|vigorous)/i.test(fullAnalysis);
-        const saysDiseased = /(?:is|looks|appears|verdict|conclusion)[:\s]*(diseased|unhealthy|sick|dying)/i.test(fullAnalysis);
-        
-        let looksHealthy;
-        if (saysDiseased && !saysHealthy) {
-            looksHealthy = false;
-        } else if (saysHealthy && !saysDiseased) {
-            looksHealthy = true;
-        } else if (positiveScore > negativeScore) {
-            looksHealthy = true;
-        } else if (negativeScore > positiveScore) {
-            looksHealthy = false;
-        } else {
-            // Check the conclusion section
-            const conclusionMatch = fullAnalysis.match(/(?:Conclusion|Verdict|Diagnosis)[:\s]*([^\n*]+)/i);
-            if (conclusionMatch) {
-                looksHealthy = !/diseased|unhealthy|sick|dying|rot/i.test(conclusionMatch[1]);
-            } else {
-                looksHealthy = true;
-            }
-        }
-        
-        console.log('📊 Scores - Negative:', negativeScore, 'Positive:', positiveScore);
-        console.log('📋 Verdict:', looksHealthy ? 'HEALTHY ✅' : 'DISEASED ⚠️');
-        
-        // Use the FULL analysis as the diagnosis
         const result = {
-            isHealthy: looksHealthy,
+            isHealthy: isHealthy,
             diagnosis: fullAnalysis,
-            treatment: looksHealthy 
-                ? 'Based on the analysis, maintain regular care and monitor for any changes.'
-                : 'Based on the analysis, immediate intervention is recommended. Isolate the plant, remove affected parts, and apply appropriate treatment.'
+            treatment: isHealthy 
+                ? 'Plant is healthy. Maintain regular care.'
+                : 'Plant is diseased. Isolate and treat immediately.'
         };
         
-        console.log('✅ Diagnosis complete!');
+        console.log('✅ Diagnosis complete! Verdict:', isHealthy ? 'HEALTHY ✅' : 'DISEASED ⚠️');
         res.json(result);
         
     } catch (error) {
