@@ -1,0 +1,16 @@
+{
+    "name": "Team ALPHA - Microgreens Project",
+    "short_name": "Team ALPHA",
+    "description": "Hydroponics Microgreens Project by Class 8A, Little Angels School, Visakhapatnam",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#4CAF50",
+    "theme_color": "#2E7D32",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ]
+}

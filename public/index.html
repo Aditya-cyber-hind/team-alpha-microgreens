@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team ALPHA - Microgreens Project</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2E7D32">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Team ALPHA">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -23,6 +28,10 @@
                 <li><a href="#science">Science</a></li>
                 <li><a href="#weather">Weather</a></li>
                 <li><a href="#disease-detector">Disease AI</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#rating">Rate</a></li>
+                <li><a href="#calculator">Calculator</a></li>
+                <li><a href="#qr">QR Code</a></li>
                 <li><a href="#team">Team</a></li>
                 <li><a href="#plants-api">Plant DB</a></li>
                 <li><a href="#quiz">Quiz</a></li>
@@ -43,8 +52,6 @@
                 <span class="badge">Hydroponics</span>
                 <span class="badge">Microgreens</span>
             </div>
-            
-            
         </div>
         <div class="hero-image" onclick="openLightbox(this)">
             <img src="/images/day5.jpeg" alt="Our Microgreens" id="heroImg">
@@ -163,79 +170,6 @@
         </div>
     </section>
 
-    <!-- Plant Database Section -->
-    <section id="plants-api" class="section">
-        <h2 class="section-title">🌿 Plant Database</h2>
-        <p class="section-subtitle">Powered by Perenual API - Learn about any plant!</p>
-        
-        <div class="plant-search">
-            <input type="text" id="plantSearch" placeholder="Search for any plant (e.g., basil, lettuce, tomato)">
-            <button onclick="searchPlants()">🔍 Search</button>
-        </div>
-        
-        <div id="plantResults" class="plant-results">
-            <!-- Plant cards will appear here -->
-        </div>
-        
-        <div class="random-facts">
-            <h3>💡 Random Plant Fact</h3>
-            <p id="randomFact">Loading amazing plant facts...</p>
-            <button onclick="getRandomFact()" class="fact-btn">🔄 New Fact</button>
-        </div>
-    </section>
-
-    <!-- Quiz Section -->
-    <section id="quiz" class="section quiz-section">
-        <h2 class="section-title">🎯 Test Your Plant Knowledge!</h2>
-        <p class="section-subtitle">How much do you know about hydroponics?</p>
-        <div class="quiz-container" id="quizContainer">
-            <h3 id="quizQuestion">Click start to begin the quiz!</h3>
-            <div class="quiz-options" id="quizOptions"></div>
-            <button onclick="startQuiz()" class="quiz-btn" id="quizBtn">Start Quiz!</button>
-            <p id="quizResult"></p>
-        </div>
-    </section>
-
-    <!-- Team Section -->
-    <section id="team" class="section">
-        <h2 class="section-title">👥 Team ALPHA</h2>
-        <p class="section-subtitle">Roll No 1-9 | Class 8A | Little Angels School</p>
-        
-        <div class="team-grid" id="teamGrid">
-            <!-- JavaScript will fill this -->
-        </div>
-        
-        <!-- Achievement Badges -->
-        <div class="achievements">
-            <h3>🏆 Team Achievements</h3>
-            <div class="badges-grid">
-                <div class="achievement-badge">🌱<br>Day 1 Survivor</div>
-                <div class="achievement-badge">🌿<br>Root Master</div>
-                <div class="achievement-badge">💪<br>Green Thumb</div>
-                <div class="achievement-badge">🏆<br>ALPHA Legend</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="section testimonials-section">
-        <h2 class="section-title">💬 What Our Team Says</h2>
-        <div class="testimonials-grid">
-            <div class="testimonial-card">
-                <p>"Growing microgreens was so cool! I never knew plants could grow without soil!"</p>
-                <h4>- Aditya Choudhary</h4>
-            </div>
-            <div class="testimonial-card">
-                <p>"The hydroponic system was easy to set up. Our microgreens grew so fast!"</p>
-                <h4>- Team ALPHA Member</h4>
-            </div>
-            <div class="testimonial-card">
-                <p>"I can't wait to try growing more plants using hydroponics at home!"</p>
-                <h4>- Team ALPHA Member</h4>
-            </div>
-        </div>
-    </section>
-
     <!-- Photo Gallery Section -->
     <section id="gallery" class="section gallery-section">
         <h2 class="section-title">📸 Photo Gallery</h2>
@@ -319,17 +253,76 @@
         </div>
     </section>
 
-    <!-- Comment Section -->
-    <section id="comments" class="section comments-section">
-        <h2 class="section-title">💬 Comments</h2>
-        <p class="section-subtitle">What do you think about our project?</p>
-        <div class="comment-form">
-            <input type="text" id="commentName" placeholder="Your Name">
-            <textarea id="commentText" placeholder="Write a comment..." rows="3"></textarea>
-            <button onclick="addComment()" class="comment-btn">💬 Post Comment</button>
+    <!-- Plant Database Section -->
+    <section id="plants-api" class="section">
+        <h2 class="section-title">🌿 Plant Database</h2>
+        <p class="section-subtitle">Powered by Perenual API - Learn about any plant!</p>
+        
+        <div class="plant-search">
+            <input type="text" id="plantSearch" placeholder="Search for any plant (e.g., basil, lettuce, tomato)">
+            <button onclick="searchPlants()">🔍 Search</button>
         </div>
-        <div id="commentsList" class="comments-list">
-            <!-- Comments will appear here -->
+        
+        <div id="plantResults" class="plant-results">
+            <!-- Plant cards will appear here -->
+        </div>
+        
+        <div class="random-facts">
+            <h3>💡 Random Plant Fact</h3>
+            <p id="randomFact">Loading amazing plant facts...</p>
+            <button onclick="getRandomFact()" class="fact-btn">🔄 New Fact</button>
+        </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section id="quiz" class="section quiz-section">
+        <h2 class="section-title">🎯 Test Your Plant Knowledge!</h2>
+        <p class="section-subtitle">How much do you know about hydroponics?</p>
+        <div class="quiz-container" id="quizContainer">
+            <h3 id="quizQuestion">Click start to begin the quiz!</h3>
+            <div class="quiz-options" id="quizOptions"></div>
+            <button onclick="startQuiz()" class="quiz-btn" id="quizBtn">Start Quiz!</button>
+            <p id="quizResult"></p>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="section">
+        <h2 class="section-title">👥 Team ALPHA</h2>
+        <p class="section-subtitle">Roll No 1-9 | Class 8A | Little Angels School</p>
+        
+        <div class="team-grid" id="teamGrid">
+            <!-- JavaScript will fill this -->
+        </div>
+        
+        <!-- Achievement Badges -->
+        <div class="achievements">
+            <h3>🏆 Team Achievements</h3>
+            <div class="badges-grid">
+                <div class="achievement-badge">🌱<br>Day 1 Survivor</div>
+                <div class="achievement-badge">🌿<br>Root Master</div>
+                <div class="achievement-badge">💪<br>Green Thumb</div>
+                <div class="achievement-badge">🏆<br>ALPHA Legend</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="section testimonials-section">
+        <h2 class="section-title">💬 What Our Team Says</h2>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <p>"Growing microgreens was so cool! I never knew plants could grow without soil!"</p>
+                <h4>- Aditya Choudhary</h4>
+            </div>
+            <div class="testimonial-card">
+                <p>"The hydroponic system was easy to set up. Our microgreens grew so fast!"</p>
+                <h4>- Team ALPHA Member</h4>
+            </div>
+            <div class="testimonial-card">
+                <p>"I can't wait to try growing more plants using hydroponics at home!"</p>
+                <h4>- Team ALPHA Member</h4>
+            </div>
         </div>
     </section>
 
@@ -365,6 +358,17 @@
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
         <img src="" alt="Lightbox Image" id="lightboxImg">
     </div>
+
+    <!-- Service Worker Registration for PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered!'))
+                    .catch(err => console.log('Service Worker failed:', err));
+            });
+        }
+    </script>
 
     <script src="script.js"></script>
 </body>
