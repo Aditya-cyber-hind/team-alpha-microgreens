@@ -44,10 +44,7 @@
                 <span class="badge">Microgreens</span>
             </div>
             
-            <!-- View Counter -->
-            <div class="view-counter">
-                <p>👀 Total Views: <span id="viewCount">0</span></p>
-            </div>
+            
         </div>
         <div class="hero-image" onclick="openLightbox(this)">
             <img src="/images/day5.jpeg" alt="Our Microgreens" id="heroImg">
@@ -236,6 +233,103 @@
                 <p>"I can't wait to try growing more plants using hydroponics at home!"</p>
                 <h4>- Team ALPHA Member</h4>
             </div>
+        </div>
+    </section>
+
+    <!-- Photo Gallery Section -->
+    <section id="gallery" class="section gallery-section">
+        <h2 class="section-title">📸 Photo Gallery</h2>
+        <p class="section-subtitle">Our growth journey in pictures!</p>
+        <div class="gallery-grid">
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="/images/day1.jpeg" alt="Day 1">
+                <span class="gallery-label">Day 1 - Monday</span>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="/images/day2.jpeg" alt="Day 2">
+                <span class="gallery-label">Day 2 - Tuesday</span>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="/images/day3.jpeg" alt="Day 3">
+                <span class="gallery-label">Day 3 - Wednesday</span>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="/images/day4.jpeg" alt="Day 4">
+                <span class="gallery-label">Day 4 - Thursday</span>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="/images/day5.jpeg" alt="Day 5">
+                <span class="gallery-label">Day 5 - Friday</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rating Section -->
+    <section id="rating" class="section rating-section">
+        <h2 class="section-title">⭐ Rate Our Project</h2>
+        <p class="section-subtitle">How did you like Team ALPHA's work?</p>
+        <div class="rating-container">
+            <div class="stars" id="starContainer">
+                <span class="star" data-rating="1" onclick="rateProject(1)">☆</span>
+                <span class="star" data-rating="2" onclick="rateProject(2)">☆</span>
+                <span class="star" data-rating="3" onclick="rateProject(3)">☆</span>
+                <span class="star" data-rating="4" onclick="rateProject(4)">☆</span>
+                <span class="star" data-rating="5" onclick="rateProject(5)">☆</span>
+            </div>
+            <p id="ratingMessage">Click a star to rate!</p>
+            <p id="averageRating">Average: No ratings yet</p>
+        </div>
+    </section>
+
+    <!-- Growth Calculator Section -->
+    <section id="calculator" class="section calculator-section">
+        <h2 class="section-title">📊 Growth Calculator</h2>
+        <p class="section-subtitle">Estimate when your microgreens will be ready!</p>
+        <div class="calculator-container">
+            <div class="calc-input">
+                <label for="plantType">🌱 Plant Type:</label>
+                <select id="plantType">
+                    <option value="radish">Radish Microgreens (5-7 days)</option>
+                    <option value="broccoli">Broccoli Microgreens (7-9 days)</option>
+                    <option value="sunflower">Sunflower Microgreens (10-14 days)</option>
+                    <option value="pea">Pea Shoots (10-14 days)</option>
+                    <option value="basil">Basil Microgreens (14-21 days)</option>
+                </select>
+            </div>
+            <div class="calc-input">
+                <label for="startDate">📅 Start Date:</label>
+                <input type="date" id="startDate">
+            </div>
+            <button onclick="calculateHarvest()" class="calc-btn">🌱 Calculate Harvest Date</button>
+            <div id="harvestResult" style="display:none;">
+                <h3>🎉 Estimated Harvest Date:</h3>
+                <p id="harvestDate"></p>
+                <p id="daysRemaining"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- QR Code Section -->
+    <section id="qr" class="section qr-section">
+        <h2 class="section-title">📱 Share Our Project</h2>
+        <p class="section-subtitle">Scan the QR code to visit our website!</p>
+        <div class="qr-container">
+            <div id="qrCode"></div>
+            <p id="qrLink">https://team-alpha-vizag.vercel.app</p>
+        </div>
+    </section>
+
+    <!-- Comment Section -->
+    <section id="comments" class="section comments-section">
+        <h2 class="section-title">💬 Comments</h2>
+        <p class="section-subtitle">What do you think about our project?</p>
+        <div class="comment-form">
+            <input type="text" id="commentName" placeholder="Your Name">
+            <textarea id="commentText" placeholder="Write a comment..." rows="3"></textarea>
+            <button onclick="addComment()" class="comment-btn">💬 Post Comment</button>
+        </div>
+        <div id="commentsList" class="comments-list">
+            <!-- Comments will appear here -->
         </div>
     </section>
 

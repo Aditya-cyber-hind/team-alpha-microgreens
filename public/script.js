@@ -577,18 +577,19 @@ async function detectDisease() {
             return;
         }
         
-        // Display detailed result
         resultDiv.innerHTML = `
-            <h3>🔬 Diagnosis Result</h3>
+            <h3>🔬 Dr. Planto's Detailed Report</h3>
             <p class="${data.isHealthy ? 'healthy' : 'diseased'}">
                 ${data.isHealthy ? '✅ Plant looks healthy!' : '⚠️ Plant may have issues!'}
             </p>
-            <h4>📋 Diagnosis:</h4>
+            ${data.plantType ? `<h4>🌿 Plant Type:</h4><p>${data.plantType}</p>` : ''}
+            ${data.growthStage ? `<h4>📈 Growth Stage:</h4><p>${data.growthStage}</p>` : ''}
+            <h4>📋 Detailed Diagnosis:</h4>
             <p>${data.diagnosis || 'Analysis complete.'}</p>
-            <h4>💊 Treatment:</h4>
+            <h4>💊 Treatment Plan:</h4>
             <p>${data.treatment || 'Continue regular care.'}</p>
-            ${data.funFact ? `<h4>💡 Fun Fact:</h4><p>${data.funFact}</p>` : ''}
-            ${data.confidence ? `<h4>📊 Confidence:</h4><p>${data.confidence}</p>` : ''}
+            ${data.funFact ? `<h4>💡 Scientific Fun Fact:</h4><p>${data.funFact}</p>` : ''}
+            ${data.confidence ? `<h4>📊 Confidence Level:</h4><p>${data.confidence}</p>` : ''}
         `;
         
     } catch (error) {
@@ -598,3 +599,167 @@ async function detectDisease() {
         detectBtn.disabled = false;
     }
 }
+// ============ VIEW COUNTER ============
+async function loadViewCount() {
+    try {
+        const response = await fetch('/api/count');
+        const data = await response.json();
+        const countElement = document.getElementById('viewCount');
+        if (countElement) {
+            countElement.textContent = data.count;
+        }
+    } catch (error) {
+        console.error('Failed to load view count');
+    }
+}
+
+loadViewCount();
+// ============ RATING SYSTEM ============
+function rateProject(rating) {
+    const stars = document.querySelectorAll('.star');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.textContent = '⭐';
+            star.classList.add('active');
+        } else {
+            star.textContent = '☆';
+            star.classList.remove('active');
+        }
+    });
+    
+    // Save rating
+    const ratings = JSON.parse(localStorage.getItem('ratings') || '[]');
+    ratings.push(rating);
+    localStorage.setItem('ratings', JSON.stringify(ratings));
+    
+    // Calculate average
+    const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+    document.getElementById('ratingMessage').textContent = `You rated ${rating} star${rating > 1 ? 's' : ''}!`;
+    document.getElementById('averageRating').textContent = `Average: ${avg.toFixed(1)} ⭐ (${ratings.length} ratings)`;
+}
+
+// Load saved ratings
+function loadRatings() {
+    const ratings = JSON.parse(localStorage.getItem('ratings') || '[]');
+    if (ratings.length > 0) {
+        const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+        document.getElementById('averageRating').textContent = `Average: ${avg.toFixed(1)} ⭐ (${ratings.length} ratings)`;
+    }
+}
+
+loadRatings();
+
+// ============ SOUND EFFECTS ============
+function playSound(type) {
+    const audio = new Audio();
+    if (type === 'click') {
+        audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
+    } else if (type === 'hover') {
+        audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
+    }
+    audio.volume = 0.3;
+    audio.play().catch(() => {});
+}
+
+// Add click sounds to buttons
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'BUTTON' || e.target.classList.contains('star') || e.target.classList.contains('gallery-item')) {
+        playSound('click');
+    }
+});
+
+// ============ GROWTH CALCULATOR ============
+function calculateHarvest() {
+    const plantType = document.getElementById('plantType').value;
+    const startDate = document.getElementById('startDate').value;
+    
+    if (!startDate) {
+        alert('Please select a start date!');
+        return;
+    }
+    
+    const growthDays = {
+        radish: 6,
+        broccoli: 8,
+        sunflower: 12,
+        pea: 12,
+        basil: 17
+    };
+    
+    const days = growthDays[plantType];
+    const start = new Date(startDate);
+    const harvest = new Date(start);
+    harvest.setDate(harvest.getDate() + days);
+    
+    const today = new Date();
+    const daysLeft = Math.ceil((harvest - today) / (1000 * 60 * 60 * 24));
+    
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    
+    document.getElementById('harvestDate').textContent = harvest.toLocaleDateString('en-US', options);
+    document.getElementById('daysRemaining').textContent = daysLeft > 0 ? `${daysLeft} days remaining! 🌱` : 'Ready to harvest! 🎉';
+    document.getElementById('harvestResult').style.display = 'block';
+    
+    playSound('click');
+}
+
+// ============ QR CODE GENERATOR ============
+function generateQRCode() {
+    const url = window.location.href;
+    const qrContainer = document.getElementById('qrCode');
+    
+    // Use QR code API
+    qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}" alt="QR Code">`;
+    document.getElementById('qrLink').textContent = url;
+}
+
+generateQRCode();
+
+// ============ COMMENT SYSTEM ============
+function addComment() {
+    const name = document.getElementById('commentName').value.trim();
+    const text = document.getElementById('commentText').value.trim();
+    
+    if (!name || !text) {
+        alert('Please enter your name and comment!');
+        return;
+    }
+    
+    const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+    comments.push({
+        name: name,
+        text: text,
+        date: new Date().toLocaleString()
+    });
+    localStorage.setItem('comments', JSON.stringify(comments));
+    
+    document.getElementById('commentName').value = '';
+    document.getElementById('commentText').value = '';
+    
+    displayComments();
+    playSound('click');
+}
+
+function displayComments() {
+    const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+    const commentsList = document.getElementById('commentsList');
+    
+    if (comments.length === 0) {
+        commentsList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
+        return;
+    }
+    
+    commentsList.innerHTML = '';
+    comments.forEach(comment => {
+        const card = document.createElement('div');
+        card.className = 'comment-card';
+        card.innerHTML = `
+            <h4>${comment.name}</h4>
+            <p>${comment.text}</p>
+            <span>${comment.date}</span>
+        `;
+        commentsList.appendChild(card);
+    });
+}
+
+displayComments();

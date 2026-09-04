@@ -219,6 +219,14 @@ app.post('/api/detect-disease', async (req, res) => {
     }
 });
 
+// ============ VIEW COUNTER ============
+let viewCount = 0;
+
+app.get('/api/count', (req, res) => {
+    viewCount++;
+    res.json({ count: viewCount });
+});
+
 app.listen(PORT, () => {
     console.log('🌱 Team ALPHA ULTIMATE server running on http://localhost:' + PORT);
     console.log('🔑 Groq API:', process.env.GROQ_API_KEY ? 'Connected ✅' : 'Missing ❌');

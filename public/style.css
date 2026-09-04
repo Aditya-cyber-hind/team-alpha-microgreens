@@ -926,3 +926,244 @@ body.dark-mode .weather-card {
     color: #f44336;
     font-weight: 600;
 }
+/* View Counter */
+.view-counter {
+    margin-top: 1.5rem;
+    background: #E8F5E9;
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    display: inline-block;
+    font-weight: 600;
+    color: #2E7D32;
+    box-shadow: 0 3px 10px rgba(76, 175, 80, 0.2);
+}
+
+.view-counter span {
+    font-size: 1.3rem;
+    color: #4CAF50;
+}
+/* Photo Gallery */
+.gallery-section {
+    background: #f9f9f9;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.gallery-item {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.gallery-item:hover {
+    transform: scale(1.05);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.gallery-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Rating Section */
+.rating-section {
+    background: #FFF8E1;
+}
+
+.rating-container {
+    text-align: center;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.stars {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 3rem;
+    margin: 1rem 0;
+}
+
+.star {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.star:hover {
+    transform: scale(1.3);
+}
+
+.star.active {
+    color: #FFD700;
+}
+
+/* Growth Calculator */
+.calculator-section {
+    background: #E8F5E9;
+}
+
+.calculator-container {
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.calc-input {
+    margin: 1rem 0;
+    text-align: left;
+}
+
+.calc-input label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #2E7D32;
+}
+
+.calc-input select,
+.calc-input input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid #4CAF50;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+.calc-btn {
+    margin-top: 1rem;
+    padding: 1rem 2rem;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+}
+
+.calc-btn:hover {
+    background: #2E7D32;
+    transform: scale(1.05);
+}
+
+#harvestResult {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+#harvestDate {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #4CAF50;
+}
+
+/* QR Code Section */
+.qr-section {
+    background: #f5f5f5;
+}
+
+.qr-container {
+    text-align: center;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+#qrCode img {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
+
+#qrLink {
+    margin-top: 1rem;
+    font-weight: 600;
+    color: #4CAF50;
+    word-break: break-all;
+}
+
+/* Comment Section */
+.comments-section {
+    background: #FFF3E0;
+}
+
+.comment-form {
+    max-width: 500px;
+    margin: 0 auto 2rem;
+}
+
+.comment-form input,
+.comment-form textarea {
+    width: 100%;
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    border: 2px solid #FF9800;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+.comment-btn {
+    padding: 0.8rem 1.5rem;
+    background: #FF9800;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.comment-btn:hover {
+    background: #F57C00;
+    transform: scale(1.05);
+}
+
+.comments-list {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.comment-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    margin: 0.5rem 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.comment-card h4 {
+    color: #FF9800;
+    margin-bottom: 0.3rem;
+}
+
+.comment-card p {
+    color: #333;
+}
+
+.comment-card span {
+    font-size: 0.8rem;
+    color: #999;
+}
