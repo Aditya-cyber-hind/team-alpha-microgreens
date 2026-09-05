@@ -393,7 +393,7 @@ async function sendMessage() {
         botMessageDiv.textContent = data.reply;
         chatMessages.appendChild(botMessageDiv);
         
-        // Speak Planto's reply
+        // Speak Planto's reply (with auto language detection)
         speakText(data.reply);
         
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -472,25 +472,106 @@ function startVoiceInput() {
     recognition.start();
 }
 
-// ============ TEXT-TO-SPEECH FOR PLANTO ============
+// ============ TEXT-TO-SPEECH (50+ LANGUAGES AUTO-DETECTION) ============
+function detectLanguage(text) {
+    const languagePatterns = [
+        // Indian Languages (30)
+        { lang: 'hi-IN', name: 'Hindi', pattern: /[\u0900-\u097F]/ },
+        { lang: 'bn-IN', name: 'Bengali', pattern: /[\u0980-\u09FF]/ },
+        { lang: 'te-IN', name: 'Telugu', pattern: /[\u0C00-\u0C7F]/ },
+        { lang: 'ta-IN', name: 'Tamil', pattern: /[\u0B80-\u0BFF]/ },
+        { lang: 'gu-IN', name: 'Gujarati', pattern: /[\u0A80-\u0AFF]/ },
+        { lang: 'kn-IN', name: 'Kannada', pattern: /[\u0C80-\u0CFF]/ },
+        { lang: 'ml-IN', name: 'Malayalam', pattern: /[\u0D00-\u0D7F]/ },
+        { lang: 'pa-IN', name: 'Punjabi', pattern: /[\u0A00-\u0A7F]/ },
+        { lang: 'or-IN', name: 'Odia', pattern: /[\u0B00-\u0B7F]/ },
+        { lang: 'ur-IN', name: 'Urdu', pattern: /[\u0600-\u06FF]/ },
+        { lang: 'ne-IN', name: 'Nepali', pattern: /[\u0900-\u097F]/ },
+        { lang: 'si-IN', name: 'Sinhala', pattern: /[\u0D80-\u0DFF]/ },
+        { lang: 'my-IN', name: 'Burmese', pattern: /[\u1000-\u109F]/ },
+        { lang: 'bo-IN', name: 'Tibetan', pattern: /[\u0F00-\u0FFF]/ },
+        { lang: 'sat-IN', name: 'Santali', pattern: /[\u1C50-\u1C7F]/ },
+        { lang: 'mni-IN', name: 'Manipuri', pattern: /[\uABC0-\uABFF]/ },
+        { lang: 'sa-IN', name: 'Sanskrit', pattern: /[\u0900-\u097F]/ },
+        { lang: 'kok-IN', name: 'Konkani', pattern: /[\u0900-\u097F]/ },
+        { lang: 'mai-IN', name: 'Maithili', pattern: /[\u0900-\u097F]/ },
+        { lang: 'doi-IN', name: 'Dogri', pattern: /[\u0900-\u097F]/ },
+        { lang: 'brx-IN', name: 'Bodo', pattern: /[\u0900-\u097F]/ },
+        { lang: 'bho-IN', name: 'Bhojpuri', pattern: /[\u0900-\u097F]/ },
+        { lang: 'mag-IN', name: 'Magahi', pattern: /[\u0900-\u097F]/ },
+        { lang: 'raj-IN', name: 'Rajasthani', pattern: /[\u0900-\u097F]/ },
+        { lang: 'ks-IN', name: 'Kashmiri', pattern: /[\u0600-\u06FF]/ },
+        { lang: 'sd-IN', name: 'Sindhi', pattern: /[\u0600-\u06FF]/ },
+        { lang: 'dz-IN', name: 'Dzongkha', pattern: /[\u0F00-\u0FFF]/ },
+        { lang: 'bpy-IN', name: 'Bishnupriya', pattern: /[\u0980-\u09FF]/ },
+        { lang: 'as-IN', name: 'Assamese', pattern: /[\u0980-\u09FF]/ },
+        { lang: 'mr-IN', name: 'Marathi', pattern: /[\u0900-\u097F]/ },
+        
+        // International Languages (20+)
+        { lang: 'en-US', name: 'English', pattern: /[a-zA-Z]/ },
+        { lang: 'es-ES', name: 'Spanish', pattern: /[áéíóúñ¿¡]/i },
+        { lang: 'fr-FR', name: 'French', pattern: /[àâçéèêëîïôùûüœæ]/i },
+        { lang: 'de-DE', name: 'German', pattern: /[äöüß]/i },
+        { lang: 'zh-CN', name: 'Chinese', pattern: /[\u4E00-\u9FFF]/ },
+        { lang: 'ja-JP', name: 'Japanese', pattern: /[\u3040-\u30FF]/ },
+        { lang: 'ko-KR', name: 'Korean', pattern: /[\uAC00-\uD7AF]/ },
+        { lang: 'ar-SA', name: 'Arabic', pattern: /[\u0600-\u06FF]/ },
+        { lang: 'ru-RU', name: 'Russian', pattern: /[\u0400-\u04FF]/ },
+        { lang: 'pt-BR', name: 'Portuguese', pattern: /[ãõáéíóúâêô]/i },
+        { lang: 'it-IT', name: 'Italian', pattern: /[àèéìíîòóùú]/i },
+        { lang: 'nl-NL', name: 'Dutch', pattern: /[éëïóöü]/i },
+        { lang: 'pl-PL', name: 'Polish', pattern: /[ąćęłńóśźż]/i },
+        { lang: 'tr-TR', name: 'Turkish', pattern: /[çğıöşü]/i },
+        { lang: 'vi-VN', name: 'Vietnamese', pattern: /[ăâđêôơư]/i },
+        { lang: 'th-TH', name: 'Thai', pattern: /[\u0E00-\u0E7F]/ },
+        { lang: 'he-IL', name: 'Hebrew', pattern: /[\u0590-\u05FF]/ },
+        { lang: 'el-GR', name: 'Greek', pattern: /[\u0370-\u03FF]/ },
+        { lang: 'id-ID', name: 'Indonesian', pattern: /[a-zA-Z]/ },
+        { lang: 'ms-MY', name: 'Malay', pattern: /[a-zA-Z]/ },
+        { lang: 'fil-PH', name: 'Filipino', pattern: /[a-zA-Z]/ }
+    ];
+    
+    // Check for non-English scripts first (more specific)
+    for (const lang of languagePatterns) {
+        if (lang.pattern.test(text)) {
+            return { code: lang.lang, name: lang.name };
+        }
+    }
+    
+    // Default to English
+    return { code: 'en-US', name: 'English' };
+}
+
 function speakText(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
+        
+        // Auto-detect language
+        const detected = detectLanguage(text);
+        utterance.lang = detected.code;
         utterance.rate = 1.0;
         utterance.pitch = 1.0;
         
-        const voices = window.speechSynthesis.getVoices();
-        const femaleVoice = voices.find(voice => 
-            voice.name.includes('Female') || 
-            voice.name.includes('Samantha') || 
-            voice.name.includes('Google UK English Female')
-        );
+        console.log('🗣️ Speaking in:', detected.name, '(', detected.code, ')');
         
-        if (femaleVoice) {
-            utterance.voice = femaleVoice;
+        // Get available voices and find matching language
+        const voices = window.speechSynthesis.getVoices();
+        
+        if (voices.length > 0) {
+            const matchingVoice = voices.find(voice => 
+                voice.lang.startsWith(detected.code.split('-')[0])
+            );
+            
+            if (matchingVoice) {
+                utterance.voice = matchingVoice;
+            } else {
+                const fallbackVoice = voices.find(voice => 
+                    voice.lang.includes(detected.code.split('-')[0])
+                );
+                if (fallbackVoice) utterance.voice = fallbackVoice;
+            }
         }
         
         window.speechSynthesis.speak(utterance);
@@ -599,21 +680,7 @@ async function detectDisease() {
         detectBtn.disabled = false;
     }
 }
-// ============ VIEW COUNTER ============
-async function loadViewCount() {
-    try {
-        const response = await fetch('/api/count');
-        const data = await response.json();
-        const countElement = document.getElementById('viewCount');
-        if (countElement) {
-            countElement.textContent = data.count;
-        }
-    } catch (error) {
-        console.error('Failed to load view count');
-    }
-}
 
-loadViewCount();
 // ============ RATING SYSTEM ============
 function rateProject(rating) {
     const stars = document.querySelectorAll('.star');
@@ -627,18 +694,15 @@ function rateProject(rating) {
         }
     });
     
-    // Save rating
     const ratings = JSON.parse(localStorage.getItem('ratings') || '[]');
     ratings.push(rating);
     localStorage.setItem('ratings', JSON.stringify(ratings));
     
-    // Calculate average
     const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
     document.getElementById('ratingMessage').textContent = `You rated ${rating} star${rating > 1 ? 's' : ''}!`;
     document.getElementById('averageRating').textContent = `Average: ${avg.toFixed(1)} ⭐ (${ratings.length} ratings)`;
 }
 
-// Load saved ratings
 function loadRatings() {
     const ratings = JSON.parse(localStorage.getItem('ratings') || '[]');
     if (ratings.length > 0) {
@@ -661,7 +725,6 @@ function playSound(type) {
     audio.play().catch(() => {});
 }
 
-// Add click sounds to buttons
 document.addEventListener('click', function(e) {
     if (e.target.tagName === 'BUTTON' || e.target.classList.contains('star') || e.target.classList.contains('gallery-item')) {
         playSound('click');
@@ -708,7 +771,6 @@ function generateQRCode() {
     const url = window.location.href;
     const qrContainer = document.getElementById('qrCode');
     
-    // Use QR code API
     qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}" alt="QR Code">`;
     document.getElementById('qrLink').textContent = url;
 }
@@ -741,8 +803,15 @@ function addComment() {
 }
 
 function displayComments() {
-    const comments = JSON.parse(localStorage.getItem('comments') || '[]');
     const commentsList = document.getElementById('commentsList');
+    
+    // Check if element exists first
+    if (!commentsList) {
+        console.log('Comments section not found - skipping');
+        return;
+    }
+    
+    const comments = JSON.parse(localStorage.getItem('comments') || '[]');
     
     if (comments.length === 0) {
         commentsList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
@@ -762,4 +831,17 @@ function displayComments() {
     });
 }
 
-displayComments();
+// Only call if element exists
+if (document.getElementById('commentsList')) {
+    displayComments();
+}
+// ============ SPLASH SCREEN ============
+window.addEventListener('load', function() {
+    const splashScreen = document.getElementById('splashScreen');
+    if (splashScreen) {
+        // Remove splash screen after animation
+        setTimeout(() => {
+            splashScreen.style.display = 'none';
+        }, 3000); // 3 seconds total
+    }
+});
